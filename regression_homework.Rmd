@@ -72,11 +72,9 @@ df = airquality
 1. Split data into training and test set (75% in train set, 25% in test set)
 
 ```{r}
-#train_regression = 
 nums = sample(c(1:nrow(df)), floor(.75*nrow(df)))
-training = df[nums,]
-#test_regression = 
-test = df[-nums,]
+train_regression = training = df[nums,]
+test_regression = df[-nums,]
 ```
 
 
@@ -92,9 +90,9 @@ We will predict the response of the Temperature based on Wind.
 
 This is the data we will fit a linear model to. 
 ```{r}
-# ggplot(data = train_regression) +
-#   geom_point(aes(x=Wind, y=Temp)) +
-#   theme_bw()
+ ggplot(data = train_regression) +
+   geom_point(aes(x=Wind, y=Temp)) +
+   theme_bw()
 ```
 
 2. Create and fit a linear model to predict Temperature from Wind using the training set
@@ -102,13 +100,14 @@ This is the data we will fit a linear model to.
 ```{r}
 #help(train)
 
-#linear_regression <- train( ~ , data= , method = "lm")
+linear_regression <- lm(Temp~Wind， data = train_regression)
 ```
 
 
 3. Vizualize how your model performed on the train data by plotting the regression line on top of the train data points. 
 ```{r}
-
+plot(train_regression$Temp ~ train_regression$Wind)
+abline(linear_regression)
 ```
 
 
@@ -121,38 +120,56 @@ This is the data we will fit a linear model to.
 
 4 a) See how the model performs on the test data
 ```{r}
-#help(predict)
-#linear_predict <- predict(, newdata=)
+linear_predict <- predict(linear_regression, newdata=test_regression)
+as.data.frame(cbind(linear_predict, test_regression$Temp))
 ```
 
 4 b) Look at the residuals. Are they close to zero?
 ```{r}
 #look at the median residual value. Close to zero is best
-#help(summary)
+
+#For training set
+mean(residuals(linear_regression)^2)
+
+
+#For test set
+mean((linear_predict - test_regression$Temp)^2)
 ```
 
 
 4 c) Plot predicted temperature vs observed temperature. A strong model should show a strong correlation
 ```{r}
+#Predicted test temperatures vs test set temperatures
+plot(linear_predict, test_regression$Temp)
+
+#Predicted training fitted values vs training set temperatures
+plot(linear_regression$fitted.values, train_regression$Temp)
 
 ```
 
 4 d) Visualize the predicted values in relation to the real data points. Look for homoscedasticity
 ```{r}
 # Extract coefficients from the model
+intercept = summary(linear_regression)$coefficients[1]
+slope = summary(linear_regression)$coefficients[2]
 
 # plot the regression line on the predicted values
+plot(test_regression$Wind, linear_predict)
+abline(linear_regression)
 
 # plot the original test values
+ggplot(data = test_regression) + 
+  geom_point(aes(test_regression$Wind, linear_predict, col = "Predicted Temperature")) +
+  geom_point(aes(test_regression$Wind, test_regression$Temp, col = "Actual Temperature")) +
+  geom_segment(aes(x= test_regression$Wind, y=test_regression$Temp, xend = test_regression$Wind, yend = linear_predict))
 
 ```
 
 4 e) Residuals should be normally distributed. Plot the density of the residuals
 ```{r}
-#residuals_lin <- residuals(linear_regression)
+residuals_lin <- residuals(linear_regression)
+plot(density(residuals_lin))
 
-#ggplot(data=residvpredict) +
-#  geom_density(aes(residual))
 ```
 
 

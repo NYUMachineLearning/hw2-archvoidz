@@ -65,7 +65,7 @@ library(ggfortify)
 
 
 #Mauna Loa CO2 concentrations
-data(airquality)
+df = airquality
 ```
 
 
@@ -73,7 +73,10 @@ data(airquality)
 
 ```{r}
 #train_regression = 
+nums = sample(c(1:nrow(df)), floor(.75*nrow(df)))
+training = df[nums,]
 #test_regression = 
+test = df[-nums,]
 ```
 
 

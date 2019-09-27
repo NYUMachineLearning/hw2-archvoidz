@@ -121,10 +121,11 @@ abline(linear_regression)
 4 a) See how the model performs on the test data
 ```{r}
 linear_predict <- predict(linear_regression, newdata=test_regression)
-as.data.frame(cbind(linear_predict, test_regression$Temp))
+head(as.data.frame(cbind(linear_predict, test_regression$Temp)))
 ```
 
 4 b) Look at the residuals. Are they close to zero?
+*The mean square residuals are relatively high*
 ```{r}
 #look at the median residual value. Close to zero is best
 
@@ -138,6 +139,7 @@ mean((linear_predict - test_regression$Temp)^2)
 
 
 4 c) Plot predicted temperature vs observed temperature. A strong model should show a strong correlation
+
 ```{r}
 #Predicted test temperatures vs test set temperatures
 plot(linear_predict, test_regression$Temp)
@@ -160,12 +162,13 @@ abline(linear_regression)
 # plot the original test values
 ggplot(data = test_regression) + 
   geom_point(aes(test_regression$Wind, linear_predict, col = "Predicted Temperature")) +
-  geom_point(aes(test_regression$Wind, test_regression$Temp, col = "Actual Temperature")) +
+  geom_point(aes(test_regression$Wind, test_regression$Temp, col = "Actual Temperature")) + 
   geom_segment(aes(x= test_regression$Wind, y=test_regression$Temp, xend = test_regression$Wind, yend = linear_predict))
 
 ```
 
 4 e) Residuals should be normally distributed. Plot the density of the residuals
+*Roughly Gaussian Distribution*
 ```{r}
 residuals_lin <- residuals(linear_regression)
 plot(density(residuals_lin))
@@ -174,8 +177,9 @@ plot(density(residuals_lin))
 
 
 4 f) Independent variables and residuals should not be correlated
+*The two are not correlated due to p-value of 1*
 ```{r}
-#cor.test(train_regression$Wind, resid(linear_regression))
+cor.test(train_regression$Wind, resid(linear_regression))
 ```
 
 
@@ -183,5 +187,16 @@ plot(density(residuals_lin))
 
 5. Create a linear model using L1 or L2 regularization to predict Temperature from Wind and Month variables. Plot your predicted values and the real Y values on the same plot. 
 
+```{r}
+ctrl =  trainControl(method = "boot", 15)
+Ridge_regression <- train(Temp ~ Wind + Month, data = train_regression,
+                          method = 'ridge', trControl= ctrl) 
 
+ridge_predict = predict(Ridge_regression, newdata = test_regression)
+
+ggplot() +
+  geom_point(aes(x = test_regression$Wind, y = ridge_predict, col = "Predicted")) +
+  geom_point(aes(x = test_regression$Wind, y = test_regression$Temp, col = "Actual"))
+
+```
 
